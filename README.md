@@ -19,12 +19,29 @@
 
 Запуск скрипта из командной строки:
 ```bash
+apt install python3.9-venv
+python3.9 -m venv venv
 . venv/bin/activate
-python3.9 -m aiohttp.web -H localhost -P 8080 main:init_func
+/home/arkkav/projects/GetTableAsync/Client/venv/bin/python3.9 -m pip install --upgrade pip
+pip install -r requirements.txt
+python3.9 -m aiohttp.web -H localhost -P 8000 main:web_app
+```
 
-
+```bash
+gunicorn main:web_app --bind localhost:8080 --worker-class aiohttp.GunicornWebWorker
 ```
 Просмотр лога:
 ```bash
 tail ...
 ```
+
+```bash
+sudo docker build -t get_table_async .
+```
+
+Запуск docker контейнера:
+```bash
+#sudo docker run --rm -it --name get_table_async-instance -p 8000:8000 get_table_async
+#sudo fuser -k 80/tcp  # если нужно освободить порт
+
+``` 
