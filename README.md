@@ -36,12 +36,63 @@ tail ...
 ```
 
 ```bash
-sudo docker build -t get_table_async .
+sudo docker build -t get_table_server .
+sudo docker build -t get_table_client .
 ```
 
 Запуск docker контейнера:
 ```bash
-#sudo docker run --rm -it --name get_table_async-instance -p 8000:8000 get_table_async
-#sudo fuser -k 80/tcp  # если нужно освободить порт
+sudo docker run -it --name get_table_server-instance -dp 8000:8000 get_table_server
+sudo docker run -it --name get_table_server-instance -dp 8000:8000 --network get_table_net get_table_server
+
+sudo docker run -it --name get_table_client-instance -dp 8000:8000 get_table_client
+sudo docker run -it --name get_table_client-instance -dp 8000:8000 --network get_table_net get_table_client
+sudo docker run -it --name get_table_client-instance --network get_table_net get_table_client
+sudo docker run -it --name get_table_client-instance --network get_table_net get_table_client python3 main.py
+
+sudo docker run -it --name get_table_client-instance -d --network get_table_net \
+--mount type=volume,source=client_volume,destination=$(pwd)/volume:/var/www/html/volume \
+get_table_client
+
+sudo docker run -it --name get_table_client-instance -d --network get_table_net \
+--mount type=bind,source=$(pwd)/volume,destination=/volume \
+get_table_client
+
+
+sudo fuser -k 80/tcp  # если нужно освободить порт
+
+sudo docker network create get_table_net
+sudo docker network inspect get_table_net
+sudo docker inspect 616d7ab5835c
+
+sudo docker volume ls
+
+sudo docker system prune -a
+
+sudo docker run -it --name get_table_client-instance -d get_table_client
+sudo docker run -it --name get_table_client-instance --network="host" get_table_client 
+sudo docker-compose up --build
 
 ``` 
+Docker-compose:
+```bash
+docker-compose build
+#или
+docker-compose up --build
+sudo docker run -it --name get_table_client-instance get_table_client
+
+sudo docker run -it a187acbec140
+
+sudo docker-compose up --build
+
+sudo docker-compose up
+
+
+```
+
+Просмотр лога контейнера:
+```bash
+sudo docker logs a932baeb5588
+
+sudo docker attach 616d7ab5835c
+```
