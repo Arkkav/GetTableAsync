@@ -31,10 +31,10 @@ def logging_configure(debug_level):
     logger.addHandler(file_handler)
     logger.setLevel(debug_level)
     aiohttp_logger = logging.root.manager.loggerDict['aiohttp.access']
-    for hdlr in aiohttp_logger.handlers[:]:
-        if isinstance(hdlr, (logging.FileHandler, logging.StreamHandler)):
-            aiohttp_logger.removeHandler(hdlr)
-    aiohttp_logger.addHandler(file_handler)
+    # for hdlr in aiohttp_logger.handlers[:]:
+    #     if isinstance(hdlr, (logging.FileHandler, logging.StreamHandler)):
+    #         aiohttp_logger.removeHandler(hdlr)
+    # aiohttp_logger.addHandler(file_handler)
     aiohttp_logger.setLevel(logging.DEBUG if DEBUG else logging.WARNING)
     return logger
 
@@ -99,12 +99,5 @@ def web_app(argv):
 
 
 if __name__ == '__main__':
-    web.run_app(web_app(''), host=SERVER_ADDRESS, port=int(SERVER_PORT))
-    # web.run_app(web_app(''), host=SERVER_ADDRESS, port=int(SERVER_PORT), access_log=api_logger,
-    #             access_log_format='"%r" %s %b "%{Referer}i" "%{User-Agent}i"')
-    # runner = web.AppRunner(web_app(''), access_log_format='"%r" %s %b "%{Referer}i" "%{User-Agent}i"')
-    # runner.setup()
-    # site = web.TCPSite(runner, SERVER_ADDRESS, int(SERVER_PORT))
-    # site.start()
-    # # wait for finish signal
-    # runner.cleanup()
+    web.run_app(web_app(''), host=SERVER_ADDRESS, port=int(SERVER_PORT), access_log=api_logger,
+                access_log_format='"%r" %s %b "%{Referer}i" "%{User-Agent}i"')
