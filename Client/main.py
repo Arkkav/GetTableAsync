@@ -2,22 +2,21 @@ import aiohttp
 import asyncio
 import logging
 import os
-# from client_volume import config
 
 
-# DEBUG = True															# Debug or error level for a logger messages
-# SERVER_ADDRESS = 'localhost'  #'0.0.0.0'    # 'get_table_server-instance'  #											# The address we are listening to
-# SERVER_PORT = '8000'  													# Port
-# LOGGER_NAME = 'get_table_client'										# The name of our logger
-# LOG_FILE_PATH = os.environ['PWD'] + '/client_volume'
-# ROWS_NUMBER_LIST = '1,10,100'.split(',')
+DEBUG = True															# Debug or error level for a logger messages
+SERVER_ADDRESS = 'localhost'  #'0.0.0.0'    # 'get_table_server-instance'  #											# The address we are listening to
+SERVER_PORT = '8000'  													# Port
+LOGGER_NAME = 'get_table_client'										# The name of our logger
+LOG_FILE_PATH = os.environ['PWD'] + '/client_volume'
+ROWS_NUMBER_LIST = '1,10,100'.split(',')
 
-DEBUG = os.environ['DEBUG']																# Debug or error level for a logger messages
-SERVER_ADDRESS = os.environ['SERVER_ADDRESS']   #'0.0.0.0'  #'localhost'  											# The address we are listening to
-SERVER_PORT = os.environ['SERVER_PORT']   													# Port
-LOGGER_NAME = os.environ['LOGGER_NAME']											# The name of our logger
-LOG_FILE_PATH = os.environ['LOG_FILE_PATH']
-ROWS_NUMBER_LIST = os.environ['ROWS_NUMBER_LIST'].split(',')
+# DEBUG = os.environ['DEBUG']																# Debug or error level for a logger messages
+# SERVER_ADDRESS = os.environ['SERVER_ADDRESS']   #'0.0.0.0'  #'localhost'  											# The address we are listening to
+# SERVER_PORT = os.environ['SERVER_PORT']   													# Port
+# LOGGER_NAME = os.environ['LOGGER_NAME']											# The name of our logger
+# LOG_FILE_PATH = os.environ['LOG_FILE_PATH']
+# ROWS_NUMBER_LIST = os.environ['ROWS_NUMBER_LIST'].split(',')
 
 
 def logging_configure(debug_level):
@@ -45,10 +44,15 @@ async def on_request_start(session, context, params):
 
 
 async def get_rows(url, session, params):
-    async with session.get(url, params=params) as response:
-        logging.getLogger('aiohttp.client').debug(f'Response: <{response.url}>')
-        logging.getLogger('aiohttp.client').debug(f'{str(response.headers)}')
-        logging.getLogger('aiohttp.client').debug(f'<{await response.text()}>')
+    try:
+        async with session.get(url, params=params) as response:
+            logging.getLogger('aiohttp.client').debug(f'Response: <{response.url}>')
+            logging.getLogger('aiohttp.client').debug(f'{str(response.headers)}')
+            logging.getLogger('aiohttp.client').debug(f'<{await response.text()}>')
+    except aiohttp.ClientConnectorError as e:
+        api_logger.debug(str(e))
+    except asyncio.TimeoutError as e:
+        api_logger.debug('TimeoutError')
 
 
 async def run(rows):
@@ -58,7 +62,8 @@ async def run(rows):
     trace_config.on_request_start.append(on_request_start)
     # Fetch all responses within one Client session,
     # keep connection alive for all requests.
-    async with aiohttp.ClientSession(trace_configs=[trace_config]) as session:
+    timeout = aiohttp.ClientTimeout(total=400)
+    async with aiohttp.ClientSession(trace_configs=[trace_config], timeout=timeout) as session:
         for i in rows:
             params = {'n': str(i)}
             params = '?' + ''.join([k + '=' + v for k, v in params.items()])

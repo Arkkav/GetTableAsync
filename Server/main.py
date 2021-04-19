@@ -5,21 +5,23 @@ import json
 import logging
 import os
 import sys
+from functools import reduce
+from io import StringIO
 
 
-# DEBUG = True															# Debug or error level for a logger messages
-# SERVER_ADDRESS = 'localhost'  											# The address we are listening to
-# SERVER_PORT = 8000  													# Port
-# LOGGER_NAME = 'get_table_server'										# The name of our logger
-# LOG_FILE_PATH = os.environ['PWD'] + '/server_volume'
-# CSV_URL = r'https://stepik.org/media/attachments/course/4852/StudentsPerformance.csv'
+DEBUG = True															# Debug or error level for a logger messages
+SERVER_ADDRESS = 'localhost'  											# The address we are listening to
+SERVER_PORT = 8000  													# Port
+LOGGER_NAME = 'get_table_server'										# The name of our logger
+LOG_FILE_PATH = os.environ['PWD'] + '/server_volume'
+CSV_URL = r'https://stepik.org/media/attachments/course/4852/StudentsPerformance.csv'
 
-DEBUG = os.environ['DEBUG']															# Debug or error level for a logger messages
-SERVER_ADDRESS = os.environ['SERVER_ADDRESS'] 											# The address we are listening to
-SERVER_PORT = os.environ['SERVER_PORT']  													# Port
-LOGGER_NAME = os.environ['LOGGER_NAME']										# The name of our logger
-LOG_FILE_PATH = os.environ['LOG_FILE_PATH']
-CSV_URL = os.environ['CSV_URL']
+# DEBUG = os.environ['DEBUG']															# Debug or error level for a logger messages
+# SERVER_ADDRESS = os.environ['SERVER_ADDRESS'] 											# The address we are listening to
+# SERVER_PORT = os.environ['SERVER_PORT']  													# Port
+# LOGGER_NAME = os.environ['LOGGER_NAME']										# The name of our logger
+# LOG_FILE_PATH = os.environ['LOG_FILE_PATH']
+# CSV_URL = os.environ['CSV_URL']
 
 
 def logging_configure(debug_level):
@@ -61,7 +63,7 @@ class Handler:
                 n = int(n)
             except (ValueError, TypeError) as e:
                 error_json('Parameter n should be defined as integer.')
-            return web.json_response(self.df.head(n=n).to_dict())
+            return web.json_response(self.df.head(n=n).to_dict('records'))
         else:
             message = 'Method not allowed.'
             data = {'Error': message}
@@ -76,15 +78,29 @@ class Handler:
         raise web.HTTPNotFound(body=json.dumps(data).encode())
 
 
+def set_category(chunk):
+    category_cols = ['gender', 'race/ethnicity', 'parental level of education', 'lunch', 'test preparation course']
+    chunk[category_cols] = chunk[category_cols].astype('category')
+    return chunk
+
+
+def add(previous_result, new_result):
+    return previous_result.add(new_result, fill_value=0)
+
+
 def students_performance_csv_to_df():
     dtype = {
         'math score': np.int8,
         'reading score': np.int8,
         'writing score': np.int8,
     }
-    df = pd.read_csv(CSV_URL, dtype=dtype)
-    category_cols = ['gender', 'race/ethnicity', 'parental level of education', 'lunch', 'test preparation course']
-    df[category_cols] = df[category_cols].astype('category')
+    # MapReduce structure:
+    chunks = pd.read_csv(CSV_URL, dtype=dtype, chunksize=1000)
+    processed_chunks = map(set_category, chunks)
+    df = reduce(add, processed_chunks)
+    buf = StringIO()
+    df.info(buf=buf)
+    api_logger.info(buf.getvalue())
     return df
 
 

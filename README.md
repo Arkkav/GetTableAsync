@@ -96,3 +96,6 @@ sudo docker logs a932baeb5588
 
 sudo docker attach 616d7ab5835c
 ```
+Swagger сервера:
+
+https://app.swaggerhub.com/apis-docs/Arkkav/GetTableAsync/1.0.0#/default/findPetsByStatus
