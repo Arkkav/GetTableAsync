@@ -4,19 +4,12 @@ import logging
 import os
 
 
-DEBUG = True															# Debug or error level for a logger messages
-SERVER_ADDRESS = 'localhost'  #'0.0.0.0'    # 'get_table_server-instance'  #											# The address we are listening to
-SERVER_PORT = '8000'  													# Port
-LOGGER_NAME = 'get_table_client'										# The name of our logger
-LOG_FILE_PATH = os.environ['PWD'] + '/client_volume'
-ROWS_NUMBER_LIST = '1,10,100'.split(',')
-
-# DEBUG = os.environ['DEBUG']																# Debug or error level for a logger messages
-# SERVER_ADDRESS = os.environ['SERVER_ADDRESS']   #'0.0.0.0'  #'localhost'  											# The address we are listening to
-# SERVER_PORT = os.environ['SERVER_PORT']   													# Port
-# LOGGER_NAME = os.environ['LOGGER_NAME']											# The name of our logger
-# LOG_FILE_PATH = os.environ['LOG_FILE_PATH']
-# ROWS_NUMBER_LIST = os.environ['ROWS_NUMBER_LIST'].split(',')
+DEBUG = bool(os.environ['DEBUG'])									# Debug or error level for a logger messages
+SERVER_ADDRESS = os.environ['SERVER_ADDRESS']   					# The address we are listening to
+SERVER_PORT = os.environ['SERVER_PORT']   							# Port
+LOGGER_NAME = os.environ['LOGGER_NAME']								# The name of our logger
+LOG_FILE_PATH = os.environ['LOG_FILE_PATH']                         # Path for log in the container
+ROWS_NUMBER_LIST = os.environ['ROWS_NUMBER_LIST'].split(',')        # Number of times and rows to get from server
 
 
 def logging_configure(debug_level):
@@ -27,6 +20,7 @@ def logging_configure(debug_level):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     logger.setLevel(debug_level)
+    # setup http requests log
     aiohttp_logger = logging.root.manager.loggerDict['aiohttp.client']
     for hdlr in aiohttp_logger.handlers[:]:
         if isinstance(hdlr, (logging.FileHandler, logging.StreamHandler)):
@@ -35,11 +29,12 @@ def logging_configure(debug_level):
     aiohttp_logger.setLevel(logging.DEBUG if DEBUG else logging.WARNING)
     return logger
 
-
+# Global logger variable
 api_logger = logging_configure(logging.DEBUG if DEBUG else logging.WARNING)
 
 
 async def on_request_start(session, context, params):
+    # coroutine for tracing responses (starts in a proper time)
     logging.getLogger('aiohttp.client').debug(f'Starting request <{params.url, params.method, params.headers}>')
 
 
@@ -56,7 +51,7 @@ async def get_rows(url, session, params):
 
 
 async def run(rows):
-    url = 'http://' + SERVER_ADDRESS + ':' + str(SERVER_PORT) + '/'
+    url = 'http://' + SERVER_ADDRESS + ':' + str(SERVER_PORT) + '/'    # form URL
     tasks = []
     trace_config = aiohttp.TraceConfig()
     trace_config.on_request_start.append(on_request_start)
@@ -66,12 +61,13 @@ async def run(rows):
     async with aiohttp.ClientSession(trace_configs=[trace_config], timeout=timeout) as session:
         for i in rows:
             params = {'n': str(i)}
+            # form parameters string from scratch because I want
+            # to get them in on_request_start for tracing properly
             params = '?' + ''.join([k + '=' + v for k, v in params.items()])
-            task = asyncio.create_task(get_rows(url + params, session, {}))
+            task = asyncio.create_task(get_rows(url + params, session, {}))         # create tasks from coroutines
             tasks.append(task)
-        return await asyncio.gather(*tasks)
-
-asyncio.run(run(ROWS_NUMBER_LIST))
+        return await asyncio.gather(*tasks)                         # collect all tasks, run and get results
 
 
-
+if __name__ == '__main__':
+    asyncio.run(run(ROWS_NUMBER_LIST))
