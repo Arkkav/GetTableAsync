@@ -98,5 +98,5 @@ components:
           type: integer
           format: int8
           minimum: 0
-          maximum: 100
+          maximum: 100          
           example: 66
