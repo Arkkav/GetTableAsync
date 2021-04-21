@@ -36,8 +36,6 @@
 mkdir GetTableAsync
 git clone https://github.com/Arkkav/GetTableAsync.git GetTableAsync
 cd GetTableAsync
-
-
 ```
 
 ### Запуск сервера
