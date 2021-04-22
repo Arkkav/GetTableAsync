@@ -1,10 +1,4 @@
 FROM ubuntu:latest
-#ENV DEBUG=true
-#ENV SERVER_ADDRESS='localhost'
-#ENV SERVER_PORT=8000
-#ENV LOGGER_NAME='get_table_server'
-#ENV LOG_FILE_NAME='/var/www/html/server_volume/log.log'
-#ENV CSV_URL='https://stepik.org/media/attachments/course/4852/StudentsPerformance.csv'
 ENV TZ 'Europe/Moscow'
 RUN apt-get update \
   && echo $TZ > /etc/timezone \
@@ -25,6 +19,4 @@ WORKDIR /var/www/html
 COPY . .
 RUN pip install -r requirements.txt
 EXPOSE 8000
-#ENTRYPOINT ["python3.9", "-m", "aiohttp.web", "-H", "0.0.0.0", "-P", "8000", "main:web_app"]
 CMD python3.9 -m aiohttp.web -H 0.0.0.0 -P 8000 main:web_app
-#CMD python3.9 main.py

@@ -3,30 +3,9 @@ services:
   server:
     build: .
     ports:
-      - "8000:8000"
     env_file: .env
-#    environment:
-#      DEBUG: 'true'                                                            # Debug or error level for a logger messages
-#      SERVER_ADDRESS: localhost                                             # The address we are listening to
-#      SERVER_PORT: 8000                                                    # Port
-#      LOGGER_NAME: get_table_server                                        # The name of our logger
-#      - LOG_FILE_NAME
-#      CSV_URL: https://stepik.org/media/attachments/course/4852/StudentsPerformance.csv
     volumes:
       - type: bind
         source: ./server_volume
         target: ${LOG_FILE_PATH}
         read_only: false
-
-#      - /home/arkkav/projects/GetTableAsync/Server/logvolume/log.log:/var/log/log.log
-#      - ./logvolume/${LOG_FILE_NAME}:/var/log/${LOG_FILE_NAME}
-#      - logvolume:/var/www/html/logvolume
-#      - ./logvolume/log.log:/var/log/log.log
-#  - logvolume/log.log:/var/log/log.log
-#    type=volume,source=client_volume,
-#    links:
-#      - redis
-#  client:
-#    build: ./Client
-#volumes:
-#  logvolume:
