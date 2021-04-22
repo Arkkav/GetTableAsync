@@ -4,12 +4,19 @@ import logging
 import os
 
 
-DEBUG = bool(os.environ['DEBUG'])									# Debug or error level for a logger messages
-SERVER_ADDRESS = os.environ['SERVER_ADDRESS']   					# The address we are listening to
-SERVER_PORT = os.environ['SERVER_PORT']   							# Port
-LOGGER_NAME = os.environ['LOGGER_NAME']								# The name of our logger
-LOG_FILE_PATH = os.environ['LOG_FILE_PATH']                         # Path for log in the container
-ROWS_NUMBER_LIST = os.environ['ROWS_NUMBER_LIST'].split(',')        # Number of times and rows to get from server
+# DEBUG = bool(os.environ['DEBUG'])									# Debug or error level for a logger messages
+# SERVER_ADDRESS = os.environ['SERVER_ADDRESS']   					# The address we are listening to
+# SERVER_PORT = os.environ['SERVER_PORT']   							# Port
+# LOGGER_NAME = os.environ['LOGGER_NAME']								# The name of our logger
+# LOG_FILE_PATH = os.environ['LOG_FILE_PATH']                         # Path for log in the container
+# ROWS_NUMBER_LIST = os.environ['ROWS_NUMBER_LIST'].split(',')        # Number of times and rows to get from server
+
+DEBUG = True															# Debug or error level for a logger messages
+SERVER_ADDRESS = 'localhost'  #'0.0.0.0'    # 'get_table_server-instance'  #											# The address we are listening to
+SERVER_PORT = '8000'  													# Port
+LOGGER_NAME = 'get_table_client'										# The name of our logger
+LOG_FILE_PATH = os.environ['PWD'] + '/client_volume'
+ROWS_NUMBER_LIST = '1,3,5'.split(',')
 
 
 def logging_configure(debug_level):
@@ -41,7 +48,7 @@ async def on_request_start(session, context, params):
 async def get_rows(url, session, params):
     try:
         async with session.get(url, params=params) as response:
-            logging.getLogger('aiohttp.client').debug(f'Response: <{response.url}>')
+            logging.getLogger('aiohttp.client').debug(f'Response: <{response.method} {response.status} {response.url}>')
             logging.getLogger('aiohttp.client').debug(f'{str(response.headers)}')
             logging.getLogger('aiohttp.client').debug(f'<{await response.text()}>')
     except aiohttp.ClientConnectorError as e:

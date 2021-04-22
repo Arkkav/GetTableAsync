@@ -62,11 +62,21 @@ curl -X POST http://0.0.0.0:8000/erhhe
 curl http://0.0.0.0:8000/?n=100
 curl http://0.0.0.0:8000/?n=3
 ```
-
-
-
-
-
+---
+GET 200 http://localhost:8000/?n=1
+('Content-Type': 'application/json; charset=utf-8', 'Content-Length': '219', 'Date': 'Thu, 22 Apr 2021 13:24:37 GMT', 'Server': 'Python/3.9 aiohttp/3.7.4.post0')>
+[{"gender": "female", "race/ethnicity": "group B", "parental level of education": "bachelor's degree", "lunch": "standard", "test preparation course": "none", "math score": 72, "reading score": 72, "writing score": 74}]
+---
+GET 200 http://localhost:8000/?n=3
+('Content-Type': 'application/json; charset=utf-8', 'Content-Length': '655', 'Date': 'Thu, 22 Apr 2021 13:24:37 GMT', 'Server': 'Python/3.9 aiohttp/3.7.4.post0')>
+[{"gender": "female", "race/ethnicity": "group B", "parental level of education": "bachelor's degree", "lunch": "standard", "test preparation course": "none", "math score": 72, "reading score": 72, "writing score": 74}, {"gender": "female", "race/ethnicity": "group C", "parental level of education": "some college", "lunch": "standard", "test preparation course": "completed", "math score": 69, "reading score": 90, "writing score": 88}, {"gender": "female", "race/ethnicity": "group B", "parental level of education": "master's degree", "lunch": "standard", "test preparation course": "none", "math score": 90, "reading score": 95, "writing score": 93}]
+---
+GET 400 http://localhost:8000/?n=hg
+{"Error": "Parameter n should be defined as integer."}
+---
+GET 404 http://localhost:8000/ergre
+{"Error": "Resource 'ergre' not found."}
+---
 Swagger сервера:
 
 https://app.swaggerhub.com/apis-docs/Arkkav/GetTableAsync/1.0.0#/default/findPetsByStatus
