@@ -59,7 +59,7 @@ tail -n 50  ./Server/server_volume/log.log
 ### Пример использования сервера
 
 ---
-GET http://localhost:8000/?n=1
+GET http://localhost:8000/?n=1 \
 200 
 [{"gender": "female", 
 "race/ethnicity": "group B", 
@@ -71,11 +71,11 @@ GET http://localhost:8000/?n=1
 "writing score": 74}]
 
 ---
-GET http://localhost:8000/?n=hg
+GET http://localhost:8000/?n=hg \
 400 {"Error": "Parameter n should be defined as integer."}
 
 ---
-GET http://localhost:8000/ergre
+GET http://localhost:8000/ergre \
 404 {"Error": "Resource 'ergre' not found."}
 
 ---
