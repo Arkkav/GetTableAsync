@@ -5,7 +5,6 @@ services:
     ports:
       - "8000:8000"
     container_name: Server
-    command: python3.9 -m aiohttp.web -H 0.0.0.0 -P 8000 main:web_app
     env_file: .env
     volumes:
       - type: bind

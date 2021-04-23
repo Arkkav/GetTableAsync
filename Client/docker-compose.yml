@@ -5,7 +5,6 @@ services:
     build: .
     env_file: .env
     container_name: Client
-    command: python3.9 main.py
     volumes:
       - type: bind
         source: ./client_volume
