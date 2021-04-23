@@ -41,16 +41,22 @@ cd GetTableAsync
 ### Запуск сервера
 ```bash
 sudo docker-compose -f ./Server/docker-compose.yml up --build -d
-sudo docker stop server_server_1
-sudo docker start server_server_1
+sudo docker stop Server
+sudo docker start Server
 ```
 
 ### Запуск клиента
 ```bash
 sudo docker-compose -f ./Client/docker-compose.yml up --build -d
-sudo docker stop client_client_1
-sudo docker start client_client_1
+sudo docker stop Client
+sudo docker start Client
 ```
+
+### Запуск вместе
+```bash
+sudo docker-compose up --build -d
+```
+
 ### Просмотр логов:
 ```bash
 tail -n 50  ./Client/client_volume/log.log

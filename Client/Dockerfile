@@ -18,4 +18,3 @@ RUN apt-get update \
 WORKDIR /var/www/html
 COPY . .
 RUN pip install -r requirements.txt
-ENTRYPOINT ["python3.9", "main.py"]

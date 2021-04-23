@@ -4,10 +4,10 @@ services:
     network_mode: host
     build: .
     env_file: .env
-    environment:
-      - LOG_FILE_PATH
+    container_name: Client
+    command: python3.9 main.py
     volumes:
       - type: bind
         source: ./client_volume
-        target: ${LOG_FILE_PATH}
+        target: /var/www/html/client_volume
         read_only: false
