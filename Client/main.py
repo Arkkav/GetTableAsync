@@ -4,7 +4,7 @@ import logging
 import os
 
 
-DEBUG = bool(os.environ['DEBUG'])									# Debug or error level for a logger messages
+DEBUG = int(os.environ['DEBUG'])									# Debug or error level for a logger messages
 SERVER_ADDRESS = os.environ['SERVER_ADDRESS']   					# The address we are listening to
 SERVER_PORT = os.environ['SERVER_PORT']   							# Port
 LOGGER_NAME = os.environ['LOGGER_NAME']								# The name of our logger
