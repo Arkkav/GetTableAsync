@@ -25,11 +25,8 @@ def logging_configure(debug_level):
     logger.setLevel(debug_level)
     # setup http requests log
     aiohttp_logger = logging.root.manager.loggerDict['aiohttp.access']
-    for hdlr in aiohttp_logger.handlers[:]:
-        if isinstance(hdlr, (logging.FileHandler, logging.StreamHandler)):
-            aiohttp_logger.removeHandler(hdlr)
     aiohttp_logger.addHandler(file_handler)
-    aiohttp_logger.setLevel(logging.DEBUG if DEBUG else logging.WARNING)
+    aiohttp_logger.setLevel(debug_level)
     return logger
 
 

@@ -19,4 +19,4 @@ WORKDIR /var/www/html
 COPY . .
 RUN pip install -r requirements.txt
 EXPOSE 8000
-CMD python3.9 -m aiohttp.web -H 0.0.0.0 -P 8000 main:web_app
+CMD python main.py
