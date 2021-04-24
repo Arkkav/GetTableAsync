@@ -52,7 +52,7 @@ sudo docker stop Client
 sudo docker start Client
 ```
 
-### Запуск вместе
+### Запуск двух сервисов вместе
 ```bash
 sudo docker-compose up --build -d
 ```

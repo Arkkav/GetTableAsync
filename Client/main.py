@@ -46,12 +46,16 @@ async def get_rows(url, session, params):
             logging.getLogger('aiohttp.client').debug(f'<{await response.text()}>')
     except aiohttp.ClientConnectorError as e:
         api_logger.debug(str(e))
+        raise                                               # for restarting container if server is unavailable
     except asyncio.TimeoutError as e:
         api_logger.debug('TimeoutError')
+        raise
     except aiohttp.ClientOSError as e:
         api_logger.debug(str(e))
+        raise
     except aiohttp.ServerDisconnectedError as e:
         api_logger.debug(str(e))
+        raise
 
 
 async def run(rows):

@@ -3,6 +3,7 @@ services:
   client:
     network_mode: host
     build: .
+    restart: on-failure:10
     env_file: .env
     container_name: Client
     volumes:
