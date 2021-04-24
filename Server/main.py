@@ -73,7 +73,7 @@ class Handler:
         :param request: sent on the client side
         :return: error 404 in JSON
         """
-        message = "Resource '{resourse}' not found.".format(resourse=request.match_info.get('name', ''))
+        message = "Resource '{resource}' not found.".format(resource=request.match_info.get('name', ''))
         data = {'Error': message}
         api_logger.debug(message)
         raise web.HTTPNotFound(body=json.dumps(data).encode())
