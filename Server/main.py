@@ -3,11 +3,13 @@ import pandas as pd
 import numpy as np
 import json
 import logging
+import asyncio
 import os
 from functools import reduce
 from io import StringIO
+from concurrent.futures import ThreadPoolExecutor
 
-DEBUG = int(os.environ['DEBUG'])                                       # Debug or error level for a logger messages
+DEBUG = int(os.environ['DEBUG'])                                        # Debug or error level for a logger messages
 SERVER_ADDRESS = os.environ['SERVER_ADDRESS'] 							# The address we are listening to
 SERVER_PORT = os.environ['SERVER_PORT']  								# Port
 LOGGER_NAME = os.environ['LOGGER_NAME']									# The name of our logger
@@ -40,8 +42,12 @@ def error_json(message):
 
 
 class Handler:
-    def __init__(self, read_df):
+    def __init__(self, read_df, loop=asyncio.get_event_loop()):
         self.df = read_df()                 # pass a function which returns pandas Dataframe
+        self.loop = loop
+        
+    async def get_head(self, n):
+        return self.df.head(n=n).to_dict('records')
 
     async def all_handler(self, request):
         """
@@ -58,7 +64,10 @@ class Handler:
                 n = int(n)
             except (ValueError, TypeError) as e:
                 error_json('Parameter n should be defined as integer.')
-            return web.json_response(self.df.head(n=n).to_dict('records'))
+            else:
+                executor = request.app["executor"]
+                result = await self.loop.run_in_executor(executor, self.get_head, n)
+                return web.json_response(await result)
         else:
             # for POST, PUT, HEAD ect.
             message = 'Method not allowed.'
@@ -99,9 +108,9 @@ def students_performance_csv_to_df():
         'writing score': np.int8,
     }
     # MapReduce structure:
-    chunks = pd.read_csv(CSV_URL, dtype=dtype, chunksize=1000)          # construct Dataframe from *.csv file
-    processed_chunks = map(set_category, chunks)                        # make "map" object to iterate through
-    df = reduce(add, processed_chunks)                                  # collect Dataframe from chunks
+    with pd.read_csv(CSV_URL, dtype=dtype, chunksize=1000) as chunks:           # construct Dataframe from *.csv file
+        processed_chunks = map(set_category, chunks)                            # make "map" object to iterate through
+        df = reduce(add, processed_chunks)                                      # collect Dataframe from chunks
     buf = StringIO()
     df.info(buf=buf)                                            # put info not to STDOUT, but to log file
     api_logger.info(buf.getvalue())
@@ -115,6 +124,7 @@ def web_app(argv):
         web.get('/{name}', handler.not_found_handler),
         web.route('*', '/', handler.all_handler),
     ])
+    app["executor"] = ThreadPoolExecutor()
     return app
 
 
